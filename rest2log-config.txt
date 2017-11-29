@@ -1,0 +1,38 @@
+[logger]
+
+# should we log to console
+LogToConsole=true
+
+# should errors and criticals be redirected to stderr
+# if LogToConsole=true, it removes errors and criticals from stdout too
+ErrorToStderr=true
+
+# should we attempt to log everything to devlog
+LogToDevlog=false
+
+#############################
+
+[rest]
+ListenIp="127.0.0.1"
+ListenPort=5000
+UseSSL=false
+# SSLCrtPath="/some/path"
+# SSLKeyPath="/some/path"
+
+#############################
+
+[remoteLogger]
+
+# if set, this will convert \n to \\n. \r is removed either way.
+# if set to false, we will generate unique msgId and treat it is multipart-log-message
+# so will log on multiple lines but connect it together with a message Id
+EscapeCarriageReturn=false
+
+# max length that can be posted to us
+# it is calculated after \r are stripped away, but with \n in place, even if EscapeCarriageReturn is false
+MaxLength=256
+
+# adds (truncated) to the end if the log line is over MaxLength
+# this means that if the log line is > MaxLength, it will be truncated
+# to size MaxLength-len("(truncated)") - to accommodate for (truncated) text
+AddTruncated=true
