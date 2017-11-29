@@ -44,6 +44,12 @@ type config struct {
 var logger *Logger.Logger
 var rc *configRemoteLogger
 
+// monkey patching for tests
+var httpServe = http.ListenAndServe
+var httpServeTls = http.ListenAndServeTLS
+var psNameCall = psName
+var fakeRun = false
+
 func main() {
 	//vars
 	var configFile string
@@ -105,9 +111,9 @@ func main() {
 	router.POST("/:logLevel", logLine)
 	oldLogger.Info(fmt.Sprintf("Listening on %s:%d TLS=%t", *conf.Rest.ListenIp, conf.Rest.ListenPort, conf.Rest.UseSSL))
 	if conf.Rest.UseSSL == false {
-		err = http.ListenAndServe(fmt.Sprintf("%s:%d", *conf.Rest.ListenIp, conf.Rest.ListenPort), router)
+		err = httpServe(fmt.Sprintf("%s:%d", *conf.Rest.ListenIp, conf.Rest.ListenPort), router)
 	} else {
-		err = http.ListenAndServeTLS(fmt.Sprintf("%s:%d", *conf.Rest.ListenIp, conf.Rest.ListenPort), *conf.Rest.SSLCrtPath, *conf.Rest.SSLKeyPath, router)
+		err = httpServeTls(fmt.Sprintf("%s:%d", *conf.Rest.ListenIp, conf.Rest.ListenPort), *conf.Rest.SSLCrtPath, *conf.Rest.SSLKeyPath, router)
 	}
 	if err != nil {
 		oldLogger.Fatal(fmt.Sprintf("Could not listen and serve. Quitting. Details: %s", err), 9)
@@ -150,6 +156,7 @@ func logLine(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 			b.Message = strings.Join([]string{b.Message, "(truncated)"}, "")
 		}
 	}
+
 	var Messages []string
 	var uuid string
 	if rc.EscapeCarriageReturn == false {
@@ -158,9 +165,10 @@ func logLine(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	} else {
 		Messages = append(Messages, b.Message)
 	}
+
 	for i := range Messages {
 
-		switch strings.ToUpper(ps.ByName("logLevel")) {
+		switch strings.ToUpper(psNameCall(ps)) {
 		case "DEBUG":
 			if len(Messages) > 1 {
 				logger.Debug(fmt.Sprintf("multipart_id=%s %s", uuid, Messages[i]))
@@ -196,6 +204,12 @@ func logLine(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 			return
 		}
 	}
-	w.Header().Set("Content-Type", "text/plain")
-	w.Write([]byte("OK"))
+	if fakeRun == false {
+		w.Header().Set("Content-Type", "text/plain")
+		w.Write([]byte("OK"))
+	}
+}
+
+func psName(ps httprouter.Params) string {
+	return ps.ByName("logLevel")
 }
