@@ -1,6 +1,7 @@
 image: golang:1.10
 stages:
     - test
+    - build
   
 before_script:
     - go get -u github.com/julienschmidt/httprouter
