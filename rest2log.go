@@ -161,7 +161,8 @@ func logLine(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	var uuid string
 	if rc.EscapeCarriageReturn == false {
 		Messages = strings.Split(b.Message, "\n")
-		uuid, _ = gorand.UUID()
+		uuidb, _ := gorand.UUIDv4()
+		uuid, _ = gorand.MarshalUUID(uuidb)
 	} else {
 		Messages = append(Messages, b.Message)
 	}

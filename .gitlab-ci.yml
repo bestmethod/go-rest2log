@@ -1,0 +1,34 @@
+image: golang:1.10
+stages:
+    - test
+  
+before_script:
+    - go get -u github.com/julienschmidt/httprouter
+    - go get -u "github.com/BurntSushi/toml"
+    - go get -u "github.com/bestmethod/go-logger"
+    - go get -u "github.com/julienschmidt/httprouter"
+    - go get -u "github.com/leonelquinteros/gorand"
+    - cd /builds/bestmethod/go-rest2log
+    - mkdir -p bin/linux
+    - mkdir bin/windows
+    - mkdir bin/osx
+
+test:
+    stage: test
+    script:
+        - go test
+
+build:
+    stage: build
+    script:
+        - env GOOS=linux GOARCH=amd64 go build -o bin/linux/rest2log
+        - env GOODS=osx GOARCH=amd64 go build -o bin/osx/rest2log
+        - env GOOS=windows GOARCH=amd64 go build -o bin/windows/rest2log
+        - cd ..
+    artifacts:
+        paths:
+            - bin/linux
+            - bin/windows
+            - bin/osx
+            - rest2log-config.txt
+            - example-make-call.py
