@@ -2,6 +2,10 @@
 A Go service for forwarding rest API calls to go-logger. Useful for when you have a client that can't access any logging service.
 
 ## Usage
+
+You can get the compiled binary from the job artifacts download at gitlab. https://gitlab.com/bestmethod/go-rest2log/-/jobs
+
+Compile it yourself:
 ```
 go get github.com/bestmethod/go-rest2log
 cd ~/go/src/github.com/bestmethod/go-rest2log
